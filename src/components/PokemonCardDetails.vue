@@ -2,7 +2,7 @@
   <div class="pokemon-cards">
     <PokemonCardDisplay v-for="pokemon in pokemons" :key="pokemon.name"
       :class="selectedPokemonId !== null && selectedPokemonId !== pokemon.id ? 'blur' : ''"
-      @click="(fetchPokemonEvolution(pokemon.id))">
+      @click="(selectedPokemonId = pokemon.id, fetchPokemonEvolution(pokemon.id))">
       <template v-slot:title>
         <h2>{{ pokemon.name }} #{{ pokemon.id }}</h2>
       </template>
@@ -110,8 +110,8 @@ img {
   border: 16px solid #f3f3f3;
   border-radius: 50%;
   border-top: 16px solid #3498db;
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   animation: spin 2s linear infinite;
   margin: 20px auto;
   display: block;
@@ -131,12 +131,14 @@ img {
   background-color: white;
   border: 1px solid gray;
   margin: 20px auto;
+  cursor: pointer;
 }
 
 .evolution-cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: left;
+  cursor: context-menu;
 }
 
 .type-list {
