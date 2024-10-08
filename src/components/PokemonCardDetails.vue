@@ -1,8 +1,8 @@
 <template>
   <div class="pokemon-cards">
     <PokemonCardDisplay v-for="pokemon in pokemons" :key="pokemon.name"
-      :class="selectedPokemonId === pokemon.id ? 'highlighted' : selectedPokemonId !== null && selectedPokemonId !== pokemon.id ? 'blur' : ''"
-      @click="(selectedPokemonId = pokemon.id, fetchPokemonEvolution(pokemon.id))">
+      :class="selectedPokemonId !== null && selectedPokemonId !== pokemon.id ? 'blur' : ''"
+      @click="(fetchPokemonEvolution(pokemon.id))">
       <template v-slot:title>
         <h2>{{ pokemon.name }} #{{ pokemon.id }}</h2>
       </template>
