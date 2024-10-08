@@ -1,16 +1,16 @@
 <template>
   <div>
-    <PokemonCards :pokemons="pokemons" />
+    <PokemonCardDetails :pokemons="pokemons" />
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue';
-import PokemonCards from './components/PokemonCardEvolution.vue';
+import PokemonCardDetails from './components/PokemonCardDetails.vue';
 
 export default {
   components: {
-    PokemonCards,
+    PokemonCardDetails,
   },
   setup() {
     const pokemons = ref([]);

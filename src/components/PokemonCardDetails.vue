@@ -1,97 +1,161 @@
 <template>
-  <div class="card">
-    <div class="card-title">
-      <slot name="title"></slot>
-    </div>
-    <hr>
-    <div class="card-content">
-      <slot name="content"></slot>
-    </div>
-    <hr>
-    <div class="card-footer">
-      <slot name="footer"></slot>
+  <div class="pokemon-cards">
+    <PokemonCardDisplay v-for="pokemon in pokemons" :key="pokemon.name"
+      :class="selectedPokemonId === pokemon.id ? 'highlighted' : selectedPokemonId !== null && selectedPokemonId !== pokemon.id ? 'blur' : ''"
+      @click="(selectedPokemonId = pokemon.id, fetchPokemonEvolution(pokemon.id))">
+      <template v-slot:title>
+        <h2>{{ pokemon.name }} #{{ pokemon.id }}</h2>
+      </template>
+      <template v-slot:content>
+        <img :src="pokemon.image" :alt="pokemon.name" />
+      </template>
+      <template v-slot:footer>
+        <div class="type-list">
+          <div v-for="type in pokemon.types" :key="type">{{ type }}</div>
+        </div>
+      </template>
+    </PokemonCardDisplay>
+
+    <!-- Loader -->
+    <div v-if="loading" class="loader"></div>
+
+    <!-- Evolution cards -->
+    <div v-if="evolutionCards.length && !loading">
+      <h1>Pokemon Evolutions</h1>
+      <div class="evolution-cards">
+        <PokemonCardDisplay v-for="evo in evolutionCards" :key="evo.name">
+          <template v-slot:title>
+            <h2>{{ evo.name }} #{{ evo.id }}</h2>
+          </template>
+          <template v-slot:content>
+            <img :src="evo.image" :alt="evo.name" />
+          </template>
+          <template v-slot:footer>
+            <div class="type-list">
+              <div v-for="type in evo.types" :key="type">{{ type }}</div>
+            </div>
+          </template>
+        </PokemonCardDisplay>
+      </div>
     </div>
   </div>
 </template>
 
+
 <script>
+import { ref } from 'vue';
+import PokemonCardDisplay from './PokemonCardDisplay.vue';
+
 export default {
   name: 'PokemonCardDetails',
+  props: ['pokemons'],
+  components: {
+    PokemonCardDisplay,
+  },
+  setup() {
+    const evolutionCards = ref([]);
+    const loading = ref(false);
+    const selectedPokemonId = ref(null);
+
+    const fetchPokemonEvolution = async (id) => {
+      try {
+        loading.value = true;
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const evolutionIds = [id + 1, id + 2];
+        const evolutionData = await Promise.all(
+          evolutionIds.map(evoId => fetchPokemonDetails(evoId))
+        );
+
+        evolutionCards.value = evolutionData.map(pokemon => ({
+          id: pokemon.id,
+          name: pokemon.name,
+          image: pokemon.sprites.other['official-artwork'].front_default,
+          types: pokemon.types.map(typeInfo => typeInfo.type.name),
+        }));
+      } catch (err) {
+        console.error('Failed to fetch evolution:', err);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const fetchPokemonDetails = async (id) => {
+      try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching Pokémon details:', error);
+        return {};
+      }
+    };
+
+    return {
+      evolutionCards,
+      loading,
+      selectedPokemonId,
+      fetchPokemonEvolution,
+    };
+  },
 };
 </script>
 
 <style scoped>
-.card {
-  background-color: #fff;
-  border: 2px solid gray;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  padding: 20px 0px;
-  display: grid;
-  grid-gap: 20px;
-  justify-content: center;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 20px;
-  width: 25%;
-  text-align: center;
-  display: inline-block;
+img {
+  width: 100%;
 }
 
-.card-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #333;
+/* Style for the loader */
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 80px;
+  height: 80px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+  display: block;
 }
 
-.card-content {
-  font-size: 1rem;
-  margin-bottom: 15px;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pokemon-cards {
+  background-color: white;
+  border: 1px solid gray;
+  margin: 20px auto;
+}
+
+.evolution-cards {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  justify-content: left;
+}
+
+.type-list {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  overflow: hidden;
 }
 
-.card-footer {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #666;
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  height: 45px;
+h2 {
+  margin-top: 20px;
 }
 
-.card-footer div {
-  padding: 5px 10px;
-  border-radius: 20px;
-  background-color: #f2f2f2;
+h1 {
+  padding-left: 20px;
+  color: red;
 }
 
-@media (max-width:1024px) {
-  .card-title {
-    font-size: 1rem;
-  }
-
-  .card-footer {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width:475px) {
-  .card {
-    justify-content: center;
-    grid-template-columns: repeat(1, 1fr);
-    width: 90%;
-  }
-}
-
-@media (min-width:1600px) {
-  .card {
-    width: auto;
-  }
+.blur {
+  filter: blur(2px);
+  transition: filter 0.3s ease;
 }
 </style>
