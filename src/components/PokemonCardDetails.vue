@@ -62,6 +62,7 @@ export default {
   display: flex;
   justify-content: center;
   gap: 10px;
+  height: 45px;
 }
 
 .card-footer div {
@@ -88,9 +89,8 @@ export default {
   }
 }
 
-@media (min-width:1600px)
-{
-  .card{
+@media (min-width:1600px) {
+  .card {
     width: auto;
   }
 }
