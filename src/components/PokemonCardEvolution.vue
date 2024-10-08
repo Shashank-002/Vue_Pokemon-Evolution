@@ -12,8 +12,7 @@
       </template>
     </Card>
 
-    <!-- evolution card -->
-
+    <!-- Evolution cards -->
     <div v-if="evolutionCards.length">
       <h1>Evolutions</h1>
       <div class="evolution-cards">
@@ -34,10 +33,10 @@
 </template>
 
 <script>
-import Card from './CardComponent.vue';
+import Card from './PokemonCardDetails.vue';
 
 export default {
-  name: 'PokemonCards',
+  name: 'PokemonCardEvolution',
   props: ['pokemons'],
   data() {
     return {
@@ -50,48 +49,34 @@ export default {
   methods: {
     async fetchEvolution(id) {
       try {
-        const response = await fetch(`https://pokeapi.co/api/v2/evolution-chain/${id}`);
-        const data = await response.json();
-        this.evolutionCards = await this.extractEvolutionChain(data.chain);
+        // For evolution, we are simply incrementing the ID for two evolutions
+        const evolutionIds = [id + 1, id + 2];
+        const evolutionData = await Promise.all(
+          evolutionIds.map(evoId => this.fetchPokemonDetails(evoId))
+        );
+
+        this.evolutionCards = evolutionData.map(pokemon => ({
+          id: pokemon.id,
+          name: pokemon.name,
+          image: pokemon.sprites.other["official-artwork"].front_default,
+          types: pokemon.types.map(typeInfo => typeInfo.type.name),
+        }));
       } catch (err) {
         console.error('Failed to fetch evolution:', err);
       }
     },
 
-    async extractEvolutionChain(chain) {
-      const evolutions = [];
-      let current = chain;
-
-      while (current) {
-        const speciesId = current.species.url.split('/')[6];
-
-        const pokemonDetails = await this.fetchPokemonDetails(speciesId);
-
-        evolutions.push({
-          id: pokemonDetails.id,
-          name: current.species.name,
-          image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
-          types: pokemonDetails.types.map(typeInfo => typeInfo.type.name),
-        });
-
-        current = current.evolves_to[0];
-      }
-
-      return evolutions;
-    },
-
-    async fetchPokemonDetails(speciesId) {
+    async fetchPokemonDetails(id) {
       try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${speciesId}`);
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
         const data = await response.json();
         return data;
       } catch (error) {
         console.error('Error fetching Pokémon details:', error);
         return {};
       }
-    }
+    },
   }
-
 };
 </script>
 
@@ -100,9 +85,20 @@ img {
   width: 100%;
 }
 
-.evolution-cards {
+.pokemon-cards {
+  background-color: white;
+  border: 1px solid gray;
+  width: auto;
+  margin: 20px auto;
+  display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+}
+
+.evolution-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  width: 25%;
 }
 
 h2 {

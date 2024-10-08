@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: 'CardComponent',
+  name: 'PokemonCardDetails',
 };
 </script>
 
@@ -70,9 +70,9 @@ export default {
   background-color: #f2f2f2;
 }
 
-@media (max-width:768px) {
+@media (max-width:1024px) {
   .card-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .card-footer {
@@ -85,6 +85,13 @@ export default {
     justify-content: center;
     grid-template-columns: repeat(1, 1fr);
     width: 90%;
+  }
+}
+
+@media (min-width:1600px)
+{
+  .card{
+    width: auto;
   }
 }
 </style>
